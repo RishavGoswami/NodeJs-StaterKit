@@ -1,13 +1,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 
 require("dotenv").config();
 
-const users = require("./routes/api/users");
-const posts = require("./routes/api/posts");
-const profile = require("./routes/api/profile");
+// import routes
+const users = require("./api/routes/users");
+const posts = require("./api/routes/posts");
+const profile = require("./api/routes/profile");
 
 const app = express();
+
+// Body Parser
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // DB Config
 const db = require("./config/key").mongoURI;
@@ -18,8 +24,13 @@ mongoose
   .then(() => console.log("Mongo DB connected successfully."))
   .catch(err => console.log(`Oops!!! Something went wrong ${err}`));
 
-// default URL
-app.get("/", (req, res) => res.send("Hello"));
+/**
+ *    @route    GET /
+ *    @desc     Test Default route
+ *    @access   Public
+ **/
+
+app.get("/", (req, res) => res.send("The server is up and running 😀"));
 
 // Use routes
 app.use("/v1/api/users", users);
