@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // User Controllers
-const RegisterUser = require("../controllers/users");
+const User = require("../controllers/users");
 
 /**
  *    @route    GET v1/api/users/test
@@ -10,14 +10,22 @@ const RegisterUser = require("../controllers/users");
  *    @access   Public
  **/
 
-router.get("/all", RegisterUser.get_all_users);
+router.get("/all", User.get_all);
 
 /**
- *    @route    GET v1/api/users/register
+ *    @route    POST v1/api/users/register
  *    @desc     Register users
  *    @access   Public
  **/
 
-router.post("/register", RegisterUser.register_user);
+router.post("/register", User.register);
+
+/**
+ *    @route    POST v1/api/users/login
+ *    @desc     Login user | Return JWT Token
+ *    @access   Public
+ **/
+
+router.post("/login", User.login);
 
 module.exports = router;
