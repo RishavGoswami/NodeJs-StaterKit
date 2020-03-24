@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const passport = require("passport");
+const chalk = require("chalk");
 
 require("dotenv").config();
 
@@ -20,17 +22,14 @@ const db = require("./config/key").mongoURI;
 
 // Connect to MongoDB
 mongoose
-  .connect(db)
-  .then(() => console.log("Mongo DB connected successfully."))
-  .catch(err => console.log(`Oops!!! Something went wrong ${err}`));
+  .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log(chalk.bold.green("Mongo DB connected successfully.")))
+  .catch(err => console.log(chalk.red`Oops!!! Something went wrong ${err}`));
 
-/**
- *    @route    GET /
- *    @desc     Test Default route
- *    @access   Public
- **/
-
-app.get("/", (req, res) => res.send("The server is up and running 😀"));
+// Passport middleware
+app.use(passport.initialize());
+// Config
+require("./config/passport")(passport);
 
 // Use routes
 app.use("/v1/api/users", users);
@@ -41,5 +40,7 @@ const PORT = process.env.PORT;
 const HOST = process.env.HOST;
 
 app.listen(PORT, HOST, () =>
-  console.log(`Server is up and listening to ${HOST}:${PORT}`)
+  console.log(
+    chalk.bold.yellow(`Server is up and listening to ${HOST}:${PORT}`)
+  )
 );

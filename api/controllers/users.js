@@ -1,4 +1,5 @@
 const gravatar = require("gravatar");
+const chalk = require("chalk");
 
 // Get User Model
 const User = require("../models/User");
@@ -48,5 +49,18 @@ exports.login = (req, res) => {
 
       encryption.checkPassword(password, user, res);
     })
-    .catch(err => console.log(`Login error ${err}`));
+    .catch(err => console.log(chalk.bold.red(`Login error ${err}`)));
+};
+
+//    @desc   Get current user
+exports.getCurrentUser = (req, res) => {
+  const {
+    user: { name, email, avatar }
+  } = req;
+  const userResponse = {
+    name,
+    email,
+    avatar
+  };
+  res.json(userResponse);
 };
