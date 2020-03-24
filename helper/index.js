@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const keyConfig = require("../config/key");
 
 // Convert the plain password to encrypted hash password
-exports.passwordToHash = (newUser, res) =>
+const passwordToHash = (newUser, res) =>
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(newUser.password, salt, (err, hash) => {
       if (err) throw err;
@@ -15,8 +15,9 @@ exports.passwordToHash = (newUser, res) =>
         .catch(err => console.log(`Error in users ${err}`));
     });
   });
+
 //  Convert hash password and check for user in DB
-exports.checkPassword = (password, user, res) =>
+const checkPassword = (password, user, res) =>
   bcrypt.compare(password, user.password).then(isPassowrdMatched => {
     if (isPassowrdMatched) {
       const { id, name, email, avatar } = user;
@@ -41,3 +42,15 @@ exports.checkPassword = (password, user, res) =>
     }
     return res.status(400).json({ password: "Password incorrect" });
   });
+
+const isEmpty = value =>
+  value === undefined ||
+  value === null ||
+  (typeof value === "object" && Object.keys(value).length === 0) ||
+  (typeof value === "string" && value.trim().length === 0);
+
+module.exports = {
+  passwordToHash,
+  checkPassword,
+  isEmpty
+};

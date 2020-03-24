@@ -4,52 +4,80 @@ const chalk = require("chalk");
 // Get User Model
 const User = require("../models/User");
 
+// Input Validations
+const {
+  validateRegistrationInput,
+  validateLoginInput
+} = require("../../validation");
+
 // Helpers
-const encryption = require("../../helper");
+const { passwordToHash, checkPassword } = require("../../helper");
 
 //   @desc Get all users
 exports.get_all = (req, res) => {
-  res.json({
-    msg: "Users works"
+  User.find({}, (err, userList) => {
+    if (userList) res.json(userList);
+    if (err) throw err;
   });
 };
 
 //   @desc Register a user
 exports.register = (req, res) => {
+  const { errors, isValid } = validateRegistrationInput(req.body);
   const { name, email, password } = req.body;
 
-  User.findOne({ email }).then(user => {
-    if (user) {
-      return res.status(400).json({ email: "Email already exist" });
-    }
-    const avatar = gravatar.url(email, {
-      s: "200", // Size
-      r: "pg", // Rating
-      d: "mm" // Default
-    });
-    const newUser = new User({
-      name,
-      email,
-      password,
-      avatar
-    });
+  if (!isValid) return res.status(400).json(errors);
 
-    // Encrypt the plain password to hash password
-    encryption.passwordToHash(newUser, res);
-  });
+  User.findOne({ email })
+    .then(user => {
+      if (user) {
+        errors.email = "Email already exist.";
+        return res.status(400).json(errors);
+      }
+      const avatar = gravatar.url(email, {
+        s: "200", // Size
+        r: "pg", // Rating
+        d: "mm" // Default
+      });
+      const userToRegister = new User({
+        name,
+        email,
+        password,
+        avatar
+      });
+
+      // Encrypt the plain password to hash password
+      passwordToHash(userToRegister, res);
+    })
+    .catch(err => {
+      errors.error = "Something went wrong";
+      res.status(500).json(errors);
+      console.log(chalk.bold.red(`Registration error ${err}`));
+    });
 };
 
 //    @desc   Login user
 exports.login = (req, res) => {
+  const { errors, isValid } = validateLoginInput(req.body);
   const { email, password } = req.body;
+
+  if (!isValid) return res.status(400).json(errors);
 
   User.findOne({ email })
     .then(user => {
-      if (!user) return res.status(404).json({ email: "User not found." });
+      if (!user) {
+        errors.email = "User not found";
+        return res.status(404).json(errors);
+      }
 
-      encryption.checkPassword(password, user, res);
+      checkPassword(password, user, res);
     })
-    .catch(err => console.log(chalk.bold.red(`Login error ${err}`)));
+    .catch(err => {
+      errors.success = false;
+      errors.message = "Something went wrong";
+      res.status(500).json(errors);
+      console.log(chalk.bold.red(`Login error ${err}`));
+    });
 };
 
 //    @desc   Get current user
