@@ -10,8 +10,8 @@ const {
   validateLoginInput
 } = require("../../validation");
 
-// Helpers
-const { passwordToHash, checkPassword } = require("../../helper");
+// Helper methods
+const { passwordToHash, validatePassword } = require("../../helper");
 
 //   @desc Get all users
 exports.get_all = (req, res) => {
@@ -70,7 +70,7 @@ exports.login = (req, res) => {
         return res.status(404).json(errors);
       }
 
-      checkPassword(password, user, res);
+      validatePassword(password, user, res);
     })
     .catch(err => {
       errors.success = false;
@@ -80,8 +80,8 @@ exports.login = (req, res) => {
     });
 };
 
-//    @desc   Get current user
-exports.getCurrentUser = (req, res) => {
+//    @desc   Authenticate user
+exports.authenticateUser = (req, res) => {
   const {
     user: { name, email, avatar }
   } = req;

@@ -17,7 +17,7 @@ const passwordToHash = (newUser, res) =>
   });
 
 //  Convert hash password and check for user in DB
-const checkPassword = (password, user, res) =>
+const validatePassword = (password, user, res) =>
   bcrypt.compare(password, user.password).then(isPassowrdMatched => {
     if (isPassowrdMatched) {
       const { id, name, email, avatar } = user;
@@ -28,20 +28,23 @@ const checkPassword = (password, user, res) =>
         avatar
       };
 
-      const { secretOrKey, expiresIn } = keyConfig;
-      // Sign Token
-      return jwt.sign(jwtPayload, secretOrKey, { expiresIn }, (err, token) => {
-        res.json({
-          success: true,
-          token: `Bearer ${token}`,
-          message: "Login was successful."
-        });
-        if (err)
-          return res.status(500).json({ message: "Something went wrong!" });
-      });
+      return validateTokenOwner(jwtPayload, res);
     }
     return res.status(400).json({ password: "Password incorrect" });
   });
+
+const validateTokenOwner = (jwtPayload, res) => {
+  const { secretOrKey, expiresIn } = keyConfig;
+  return jwt.sign(jwtPayload, secretOrKey, { expiresIn }, (err, token) => {
+    const successEntity = {
+      success: true,
+      token: `Bearer ${token}`,
+      message: "Login was successful."
+    };
+    res.json(successEntity);
+    if (err) return res.status(500).json({ message: "Something went wrong!" });
+  });
+};
 
 const isEmpty = value =>
   value === undefined ||
@@ -51,6 +54,6 @@ const isEmpty = value =>
 
 module.exports = {
   passwordToHash,
-  checkPassword,
+  validatePassword,
   isEmpty
 };

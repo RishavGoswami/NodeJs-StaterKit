@@ -38,7 +38,7 @@ router.post("/login", User.login);
 router.get(
   "/auth",
   passport.authenticate("jwt", { session: false }),
-  User.getCurrentUser
+  User.authenticateUser
 );
 
 module.exports = router;
